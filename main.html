@@ -42,11 +42,11 @@
                 questionElement.classList.add("question");
                 
                 const questionText = document.createElement("p");
-                questionText.textContent = `${i + 1}. ${question.question}`;
+                questionText.textContent = question.question; // Removed numbering
                 questionElement.appendChild(questionText);
                 
                 for (let j = 0; j < question.choices.length; j++) {
-                    const choice = question.choices[j];
+                    const choice = questions[i].choices[j];
                     const choiceElement = document.createElement("input");
                     choiceElement.setAttribute("type", "radio");
                     choiceElement.setAttribute("name", `question-${i}`);
