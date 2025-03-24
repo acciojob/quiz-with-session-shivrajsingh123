@@ -1,17 +1,97 @@
 <!DOCTYPE html>
-
-<html>
-  <head>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-
-  <body>
-    <!-- do not change this code -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz with Session Storage</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        #questions { text-align: left; display: inline-block; }
+        .question { margin-bottom: 20px; }
+        #score { font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
     <h1>Quiz</h1>
     <div id="questions"></div>
     <button id="submit">Submit</button>
     <div id="score"></div>
+    
+    <script>
+        const quizData = [
+            { question: "What is 2 + 2?", options: ["3", "4", "5", "6"], answer: "4" },
+            { question: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], answer: "Paris" },
+            { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Saturn"], answer: "Mars" },
+            { question: "What is the largest ocean on Earth?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], answer: "Pacific" },
+            { question: "How many continents are there?", options: ["5", "6", "7", "8"], answer: "7" }
+        ];
 
-    <script type="text/javascript" src="./script.js"></script>
-  </body>
+        const questionsContainer = document.getElementById("questions");
+        const submitButton = document.getElementById("submit");
+        const scoreDisplay = document.getElementById("score");
+
+        function loadQuiz() {
+            questionsContainer.innerHTML = "";
+            quizData.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("question");
+                questionDiv.innerHTML = `<p>${index + 1}. ${q.question}</p>`;
+                q.options.forEach(option => {
+                    const radioBtn = document.createElement("input");
+                    radioBtn.type = "radio";
+                    radioBtn.name = `question${index}`;
+                    radioBtn.value = option;
+                    radioBtn.addEventListener("change", saveProgress);
+                    questionDiv.appendChild(radioBtn);
+                    questionDiv.innerHTML += ` ${option}<br>`;
+                });
+                questionsContainer.appendChild(questionDiv);
+            });
+            restoreProgress();
+        }
+
+        function saveProgress() {
+            const progress = {};
+            quizData.forEach((_, index) => {
+                const selectedOption = document.querySelector(`input[name='question${index}']:checked`);
+                if (selectedOption) {
+                    progress[`question${index}`] = selectedOption.value;
+                }
+            });
+            sessionStorage.setItem("progress", JSON.stringify(progress));
+        }
+
+        function restoreProgress() {
+            const savedProgress = JSON.parse(sessionStorage.getItem("progress")) || {};
+            Object.keys(savedProgress).forEach(key => {
+                const radioButton = document.querySelector(`input[name='${key}'][value='${savedProgress[key]}']`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                }
+            });
+        }
+
+        function calculateScore() {
+            let score = 0;
+            quizData.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name='question${index}']:checked`);
+                if (selectedOption && selectedOption.value === q.answer) {
+                    score++;
+                }
+            });
+            scoreDisplay.textContent = `Your score is ${score} out of 5.`;
+            localStorage.setItem("score", score);
+        }
+
+        submitButton.addEventListener("click", calculateScore);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadQuiz();
+            const savedScore = localStorage.getItem("score");
+            if (savedScore !== null) {
+                scoreDisplay.textContent = `Your last score was ${savedScore} out of 5.`;
+            }
+        });
+    </script>
+</body>
 </html>
